@@ -14,6 +14,13 @@ public class Predator : MonoBehaviour
     public float maxHealth = 20f;
     private float currentHealth;
 
+    public float attackInterval = 1f;
+    private float nextAttackTime = 0f;
+
+    public int requiredPlayerStage = 1;
+
+    private SpriteRenderer spriteRenderer;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -21,6 +28,7 @@ public class Predator : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player").transform;
         PickNewWanderDirection();
         currentHealth = maxHealth;
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -57,26 +65,37 @@ public class Predator : MonoBehaviour
     }
 
     void FixedUpdate()
-    {
-        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+{
+    float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+    Vector2 currentVelocity;
 
-        if (distanceToPlayer <= detectionRange)
-        {
-            Vector2 directionToPlayer = (player.position - transform.position).normalized;
-            rb.linearVelocity = directionToPlayer * chaseSpeed;
-        }
-        else
-        {
-            rb.linearVelocity = wanderDirection * wanderSpeed;
-        }
+    if (distanceToPlayer <= detectionRange)
+    {
+        Vector2 directionToPlayer = (player.position - transform.position).normalized;
+        currentVelocity = directionToPlayer * chaseSpeed;
+    }
+    else
+    {
+        currentVelocity = wanderDirection * wanderSpeed;
     }
 
-    void OnTriggerEnter2D(Collider2D other)
-{
-    if (other.CompareTag("Player"))
+    rb.linearVelocity = currentVelocity;
+
+    if (currentVelocity != Vector2.zero)
     {
-        Player playerScript = other.GetComponent<Player>();
-        playerScript.TakeDamage(damageAmount);
+        float angle = Mathf.Atan2(currentVelocity.y, currentVelocity.x) * Mathf.Rad2Deg;
+        rb.rotation = angle;
+        spriteRenderer.flipY = (angle > 90f || angle < -90f);
     }
 }
+
+    void OnTriggerStay2D(Collider2D other)
+    {
+        if (other.CompareTag("Player") && Time.time >= nextAttackTime)
+        {
+            Player playerScript = other.GetComponent<Player>();
+            playerScript.TakeDamage(damageAmount);
+            nextAttackTime = Time.time + attackInterval;
+        }
+    }
 }

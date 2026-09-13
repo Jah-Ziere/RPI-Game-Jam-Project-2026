@@ -27,6 +27,18 @@ public class Player : MonoBehaviour
 
     public GameObject gameOverPanel;
 
+    public float attackInterval = 1f;
+    private float nextAttackTime = 0f;
+
+    public float borderX = 20f;
+    public float borderY = 12f;
+
+    public int GetStage()
+    {
+    return stage;
+    }
+
+
     void Start()
 {
     rb = GetComponent<Rigidbody2D>();
@@ -46,6 +58,28 @@ void FixedUpdate()
 {
     Vector2 moveDirection = new Vector2(moveX, moveY);
     rb.linearVelocity = moveDirection * moveSpeed;
+
+    if (moveDirection != Vector2.zero)
+    {
+        if (moveDirection != Vector2.zero)
+{
+    float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
+    rb.rotation = angle;
+
+    if (angle > 90f || angle < -90f)
+    {
+        spriteRenderer.flipY = true;
+    }
+    else
+    {
+        spriteRenderer.flipY = false;
+    }
+}
+    }
+
+    float clampedX = Mathf.Clamp(transform.position.x, -borderX, borderX);
+    float clampedY = Mathf.Clamp(transform.position.y, -borderY, borderY);
+    transform.position = new Vector3(clampedX, clampedY, transform.position.z);
 }
 
 void OnTriggerEnter2D(Collider2D other)
@@ -53,12 +87,7 @@ void OnTriggerEnter2D(Collider2D other)
     if (other.CompareTag("Food"))
     {
         Destroy(other.gameObject);
-        foodEaten++;
-
-        if (foodEaten >= foodToNextLevel)
-        {
-            LevelUp();
-        }
+        AddFood(1);
     }
 }
 
@@ -152,6 +181,42 @@ public void RespawnButtonPressed()
     Time.timeScale = 1f;
     UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
 }
+
+void OnTriggerStay2D(Collider2D other)
+{
+    if (Time.time < nextAttackTime)
+    {
+        return;
+    }
+
+    if (other.CompareTag("Prey"))
+    {
+        Destroy(other.gameObject);
+        AddFood(3);
+        nextAttackTime = Time.time + attackInterval;
+    }
+    else if (other.CompareTag("Predator"))
+    {
+        Predator predatorScript = other.GetComponent<Predator>();
+
+        if (stage >= predatorScript.requiredPlayerStage)
+        {
+            predatorScript.TakeDamage(bitePower);
+            nextAttackTime = Time.time + attackInterval;
+        }
+    }
+}
+
+void AddFood(int amount)
+{
+    foodEaten += amount;
+
+    if (foodEaten >= foodToNextLevel)
+    {
+        LevelUp();
+    }
+}
+
 
     
 }
