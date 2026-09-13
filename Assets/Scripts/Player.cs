@@ -17,12 +17,21 @@ public class Player : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private int stage = 0;  
 
+    public float bitePower = 1f;
+
+    public GameObject upgradePanel;
+
+    public float maxHealth = 100f;
+    public float currentHealth;
+    public UnityEngine.UI.Slider healthBar;
+
     void Start()
 {
     rb = GetComponent<Rigidbody2D>();
-
     spriteRenderer = GetComponent<SpriteRenderer>();
     spriteRenderer.sprite = fishSprite;
+    currentHealth = maxHealth;
+    healthBar.value = currentHealth;
 }
 
 void Update()
@@ -57,7 +66,10 @@ void LevelUp()
     foodEaten = 0;
     foodToNextLevel = 5 + (level - 1);
     transform.localScale += new Vector3(0.2f, 0.2f, 0f);
-     CheckStage();
+    CheckStage();
+
+    upgradePanel.SetActive(true);
+    Time.timeScale = 0f;
 }
 
 void CheckStage()
@@ -73,5 +85,58 @@ void CheckStage()
         spriteRenderer.sprite = sharkSprite;
     }
 }
+
+void UpgradeSpeed()
+{
+    moveSpeed += 1f;
+}
+
+public void ChooseSpeedUpgrade()
+{
+    UpgradeSpeed();
+    CloseUpgradePanel();
+}
+
+public void ChooseSizeUpgrade()
+{
+    UpgradeSize();
+    CloseUpgradePanel();
+}
+
+
+void UpgradeSize()
+{
+    transform.localScale += new Vector3(0.15f, 0.15f, 0f);
+}
+
+void UpgradeBite()
+{
+    bitePower += 0.5f;
+}
+
+public void ChooseBiteUpgrade()
+{
+    UpgradeBite();
+    CloseUpgradePanel();
+}
+
+void CloseUpgradePanel()
+{
+    upgradePanel.SetActive(false);
+    Time.timeScale = 1f;
+}
+
+public void TakeDamage(float amount)
+{
+    currentHealth -= amount;
+    healthBar.value = currentHealth;
+
+    if (currentHealth <= 0f)
+    {
+        currentHealth = 0f;
+        // we'll handle death/respawn here later
+    }
+}
+
     
 }
