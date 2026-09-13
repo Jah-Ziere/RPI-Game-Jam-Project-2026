@@ -171,3 +171,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Prey
   wanderSpeed: 1
+  borderX: 35
+  borderY: 35

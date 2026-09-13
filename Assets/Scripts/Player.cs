@@ -30,8 +30,11 @@ public class Player : MonoBehaviour
     public float attackInterval = 1f;
     private float nextAttackTime = 0f;
 
-    public float borderX = 20f;
-    public float borderY = 12f;
+    public float borderX = 50f;
+    public float borderY = 50f;
+
+    public float preyHealAmount = 15f;
+    public float predatorHealAmount = 25f;
 
     public int GetStage()
     {
@@ -56,7 +59,7 @@ void Update()
 
 void FixedUpdate()
 {
-    Vector2 moveDirection = new Vector2(moveX, moveY);
+    Vector2 moveDirection = new Vector2(moveX, moveY).normalized;
     rb.linearVelocity = moveDirection * moveSpeed;
 
     if (moveDirection != Vector2.zero)
@@ -77,9 +80,27 @@ void FixedUpdate()
 }
     }
 
-    float clampedX = Mathf.Clamp(transform.position.x, -borderX, borderX);
-    float clampedY = Mathf.Clamp(transform.position.y, -borderY, borderY);
-    transform.position = new Vector3(clampedX, clampedY, transform.position.z);
+    Vector3 pos = transform.position;
+
+if (pos.x > borderX)
+{
+    pos.x = -borderX;
+}
+else if (pos.x < -borderX)
+{
+    pos.x = borderX;
+}
+
+if (pos.y > borderY)
+{
+    pos.y = -borderY;
+}
+else if (pos.y < -borderY)
+{
+    pos.y = borderY;
+}
+
+transform.position = pos;
 }
 
 void OnTriggerEnter2D(Collider2D other)
@@ -96,7 +117,6 @@ void LevelUp()
     level++;
     foodEaten = 0;
     foodToNextLevel = 5 + (level - 1);
-    transform.localScale += new Vector3(0.2f, 0.2f, 0f);
     CheckStage();
 
     upgradePanel.SetActive(true);
@@ -193,18 +213,26 @@ void OnTriggerStay2D(Collider2D other)
     {
         Destroy(other.gameObject);
         AddFood(3);
+        Heal(preyHealAmount);
         nextAttackTime = Time.time + attackInterval;
     }
     else if (other.CompareTag("Predator"))
-    {
-        Predator predatorScript = other.GetComponent<Predator>();
+{
+    Predator predatorScript = other.GetComponent<Predator>();
 
-        if (stage >= predatorScript.requiredPlayerStage)
+    if (stage >= predatorScript.requiredPlayerStage)
+    {
+        predatorScript.TakeDamage(bitePower);
+        nextAttackTime = Time.time + attackInterval;
+
+        if (predatorScript.IsDead())
         {
-            predatorScript.TakeDamage(bitePower);
-            nextAttackTime = Time.time + attackInterval;
+            Heal(predatorHealAmount);
+            AddFood(8);
+            Destroy(other.gameObject);
         }
     }
+}
 }
 
 void AddFood(int amount)
@@ -216,6 +244,20 @@ void AddFood(int amount)
         LevelUp();
     }
 }
+
+public void Heal(float amount)
+{
+    currentHealth += amount;
+
+    if (currentHealth > maxHealth)
+    {
+        currentHealth = maxHealth;
+    }
+
+    healthBar.value = currentHealth;
+}
+
+
 
 
     

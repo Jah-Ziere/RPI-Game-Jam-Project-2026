@@ -8,6 +8,9 @@ public class Prey : MonoBehaviour
     private Vector2 wanderDirection;
     private float wanderTimer;
 
+    public float borderX = 20f;
+    public float borderY = 12f;
+
     private SpriteRenderer spriteRenderer;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -40,6 +43,28 @@ public class Prey : MonoBehaviour
         rb.rotation = angle;
         spriteRenderer.flipY = (angle > 90f || angle < -90f);
     }
+
+        Vector3 pos = transform.position;
+
+        if (pos.x > borderX)
+        {
+            pos.x = -borderX;
+        }
+        else if (pos.x < -borderX)
+        {
+            pos.x = borderX;
+        }
+
+        if (pos.y > borderY)
+        {
+            pos.y = -borderY;
+        }
+        else if (pos.y < -borderY)
+        {
+            pos.y = borderY;
+        }
+
+        transform.position = pos;
     }
 
     void PickNewWanderDirection()

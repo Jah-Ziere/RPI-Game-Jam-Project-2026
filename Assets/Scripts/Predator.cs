@@ -17,6 +17,9 @@ public class Predator : MonoBehaviour
     public float attackInterval = 1f;
     private float nextAttackTime = 0f;
 
+    public float borderX = 20f;
+    public float borderY = 12f;
+
     public int requiredPlayerStage = 1;
 
     private SpriteRenderer spriteRenderer;
@@ -47,11 +50,6 @@ public class Predator : MonoBehaviour
     {
 
     currentHealth -= amount;
-
-        if (currentHealth <= 0f)
-        {
-            Destroy(gameObject);
-        }
 
     }
 
@@ -87,6 +85,28 @@ public class Predator : MonoBehaviour
         rb.rotation = angle;
         spriteRenderer.flipY = (angle > 90f || angle < -90f);
     }
+
+    Vector3 pos = transform.position;
+
+    if (pos.x > borderX)
+    {
+        pos.x = -borderX;
+    }
+    else if (pos.x < -borderX)
+    {
+        pos.x = borderX;
+    }
+
+    if (pos.y > borderY)
+    {
+        pos.y = -borderY;
+    }
+    else if (pos.y < -borderY)
+    {
+        pos.y = borderY;
+    }
+
+    transform.position = pos;
 }
 
     void OnTriggerStay2D(Collider2D other)
@@ -97,5 +117,11 @@ public class Predator : MonoBehaviour
             playerScript.TakeDamage(damageAmount);
             nextAttackTime = Time.time + attackInterval;
         }
+        
     }
+
+    public bool IsDead()
+{
+    return currentHealth <= 0f;
+}
 }
