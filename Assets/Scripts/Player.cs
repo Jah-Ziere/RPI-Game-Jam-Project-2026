@@ -25,6 +25,8 @@ public class Player : MonoBehaviour
     public float currentHealth;
     public UnityEngine.UI.Slider healthBar;
 
+    public GameObject gameOverPanel;
+
     void Start()
 {
     rb = GetComponent<Rigidbody2D>();
@@ -134,8 +136,21 @@ public void TakeDamage(float amount)
     if (currentHealth <= 0f)
     {
         currentHealth = 0f;
-        // we'll handle death/respawn here later
+        Die();
+        
     }
+}
+
+void Die()
+{
+    gameOverPanel.SetActive(true);
+    Time.timeScale = 0f;
+}
+
+public void RespawnButtonPressed()
+{
+    Time.timeScale = 1f;
+    UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
 }
 
     
