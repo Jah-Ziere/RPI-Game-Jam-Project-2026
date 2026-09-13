@@ -9,6 +9,7 @@ public class PredatorSpawner : MonoBehaviour
     private float timer;
     private Player player;
 
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
